@@ -26,7 +26,7 @@ Every line the creature speaks — its greeting, its gratitude, its confusion wh
 |---|---|
 | App | Flutter 3.44.5 / Dart 3.12.2 |
 | AI | Gemma 4 E2B `.litertlm` via `flutter_edge_ai` |
-| Lux sensor | `light_sensor` (Android `TYPE_LIGHT`) |
+| Lux sensor | Native `EventChannel` → Android `TYPE_LIGHT` |
 | Grass gate | Custom HSV pixel classifier (no model call needed) |
 | Storage | `sqflite` — creature state, care log, quest progress |
 | Camera | `camera` + `image_picker` |
