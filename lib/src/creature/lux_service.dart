@@ -1,11 +1,9 @@
 import 'dart:async';
 
-import 'package:light_sensor/light_sensor.dart';
+import 'package:flutter/services.dart';
 
-/// Wraps the Android ambient light sensor (TYPE_LIGHT) — lux units.
-///
-/// No permission required. On devices without a sensor, `hasSensor`
-/// returns false and the stream emits nothing.
+/// Wraps the Android TYPE_LIGHT ambient light sensor via a local
+/// MethodChannel/EventChannel — no third-party plugin needed.
 ///
 /// Typical readings:
 ///   indoor lamp     ~200–800 lux
@@ -14,27 +12,32 @@ import 'package:light_sensor/light_sensor.dart';
 class LuxService {
   LuxService._();
 
+  static const _methodChannel =
+      MethodChannel('com.sprout.musaddiq625/lux');
+  static const _eventChannel =
+      EventChannel('com.sprout.musaddiq625/lux_stream');
+
   /// Minimum lux to count as outdoor sunlight.
-  /// Above typical indoor lighting, below guaranteed sunshine —
-  /// most overcast days still pass this threshold.
   static const outdoorLux = 2000;
 
   /// How long the reading must stay at/above threshold to feed.
   static const holdDuration = Duration(seconds: 5);
 
-  /// Returns true if the device reports a working light sensor.
-  static Future<bool> hasSensor() =>
-      LightSensor.hasSensor().catchError((_) => false);
-
-  /// Raw stream of lux readings (integers from the sensor).
-  /// Emits nothing on devices with no sensor.
-  static Stream<double> get stream {
+  /// True if the device reports a working light sensor.
+  static Future<bool> hasSensor() async {
     try {
-      return LightSensor.luxStream().map((l) => l.toDouble());
+      final result =
+          await _methodChannel.invokeMethod<bool>('hasSensor');
+      return result ?? false;
     } catch (_) {
-      return const Stream.empty();
+      return false;
     }
   }
+
+  /// Stream of lux readings as doubles.
+  /// Emits an error event if no sensor is present.
+  static Stream<double> get stream =>
+      _eventChannel.receiveBroadcastStream().map((e) => (e as num).toDouble());
 
   /// True when [lux] is clearly outdoor-level brightness.
   static bool isOutdoor(double lux) => lux >= outdoorLux;
