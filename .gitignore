@@ -46,3 +46,6 @@ app.*.map.json
 
 # FVM
 .fvm/
+
+# Android build reports
+android/build/
