@@ -1,0 +1,110 @@
+[
+  {
+    "id": "first_sunlight",
+    "title": "First Light",
+    "chapter": 1,
+    "description": "Hold Sprout in sunlight for the first time.",
+    "type": "sunlight_count",
+    "target": 1,
+    "story_unlock": "Your creature blinks slowly. Something has changed."
+  },
+  {
+    "id": "first_meal",
+    "title": "First Meal",
+    "chapter": 1,
+    "description": "Show Sprout its first patch of grass.",
+    "type": "grass_count",
+    "target": 1,
+    "story_unlock": "A new taste. Not bad."
+  },
+  {
+    "id": "morning_person",
+    "title": "Morning Person",
+    "chapter": 1,
+    "description": "Care for Sprout two days in a row.",
+    "type": "streak",
+    "target": 2,
+    "story_unlock": "Two days in a row. Sprout notices patterns now."
+  },
+  {
+    "id": "both_worlds",
+    "title": "Both Worlds",
+    "chapter": 1,
+    "description": "Give Sprout sunlight and grass in the same day.",
+    "type": "combo_count",
+    "target": 1,
+    "story_unlock": "Sunlight and grass. The full experience."
+  },
+  {
+    "id": "sun_addict",
+    "title": "Sun Addict",
+    "chapter": 2,
+    "description": "Feed Sprout sunlight 10 times.",
+    "type": "sunlight_count",
+    "target": 10,
+    "story_unlock": "Sprout leans toward windows now."
+  },
+  {
+    "id": "herbivore",
+    "title": "Herbivore",
+    "chapter": 2,
+    "description": "Feed Sprout grass 10 times.",
+    "type": "grass_count",
+    "target": 10,
+    "story_unlock": "Sprout has opinions about different lawns."
+  },
+  {
+    "id": "routine",
+    "title": "Routine",
+    "chapter": 2,
+    "description": "Care for Sprout 3 days in a row.",
+    "type": "streak",
+    "target": 3,
+    "story_unlock": "Three days. Sprout counts them."
+  },
+  {
+    "id": "full_day",
+    "title": "Full Day",
+    "chapter": 2,
+    "description": "Sunlight and grass in the same day, 5 times.",
+    "type": "combo_count",
+    "target": 5,
+    "story_unlock": "This is becoming a life together."
+  },
+  {
+    "id": "week_outside",
+    "title": "Week Outside",
+    "chapter": 3,
+    "description": "Care for Sprout 7 days in a row.",
+    "type": "streak",
+    "target": 7,
+    "story_unlock": "A full week. Sprout is almost blooming."
+  },
+  {
+    "id": "twenty_suns",
+    "title": "Twenty Suns",
+    "chapter": 3,
+    "description": "Feed Sprout sunlight 20 times.",
+    "type": "sunlight_count",
+    "target": 20,
+    "story_unlock": "Sprout is radiant."
+  },
+  {
+    "id": "deep_root",
+    "title": "Deep Root",
+    "chapter": 3,
+    "description": "Feed Sprout grass 20 times.",
+    "type": "grass_count",
+    "target": 20,
+    "story_unlock": "Sprout knows every shade of green by heart."
+  },
+  {
+    "id": "long_game",
+    "title": "The Long Game",
+    "chapter": 3,
+    "description": "Care for Sprout 14 days in a row.",
+    "type": "streak",
+    "target": 14,
+    "story_unlock": "Two weeks. Sprout is older now, and quieter about it."
+  }
+]
