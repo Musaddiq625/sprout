@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
@@ -8,10 +8,13 @@ import 'package:path_provider_platform_interface/path_provider_platform_interfac
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:sqflite_common_ffi/sqflite_common_ffi.dart';
 
+import 'package:sprout/src/ai/creature_tools.dart';
+import 'package:sprout/src/ai/gemma_client.dart';
 import 'package:sprout/src/ai/parse.dart';
 import 'package:sprout/src/creature/creature_state.dart';
 import 'package:sprout/src/creature/creature_store.dart';
 import 'package:sprout/src/creature/creature_controller.dart';
+import 'package:sprout/src/ui/creature_widget.dart';
 import 'package:sprout/src/vision/grass_gate.dart';
 import 'package:sprout/src/vision/image_prep.dart';
 
@@ -27,6 +30,27 @@ class _FakePathProvider extends PathProviderPlatform
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
+
+/// Silent EventChannel handler — sensor streams (accel/steps) have no
+/// platform side in tests; without this the listen call throws
+/// MissingPluginException and fails the test.
+class _SilentStreamHandler extends MockStreamHandler {
+  @override
+  void onListen(Object? arguments, MockStreamHandlerEventSink events) {}
+
+  @override
+  void onCancel(Object? arguments) {}
+}
+
+void _mockSensorChannels(TestWidgetsFlutterBinding binding) {
+  for (final name in const [
+    'com.sprout.musaddiq625/accel_stream',
+    'com.sprout.musaddiq625/step_stream',
+  ]) {
+    binding.defaultBinaryMessenger
+        .setMockStreamHandler(EventChannel(name), _SilentStreamHandler());
+  }
+}
 
 img.Image _solidColor(int r, int g, int b) {
   final im = img.Image(width: 64, height: 64);
@@ -86,9 +110,10 @@ void main() {
 
     test('stage emoji maps correctly', () {
       expect(CreatureStage.shell.emoji, '🥚');
-      expect(CreatureStage.hatchling.emoji, '🐣');
       expect(CreatureStage.sprout.emoji, '🌱');
       expect(CreatureStage.bloom.emoji, '🌸');
+      expect(CreatureStage.grove.emoji, '�');
+      expect(CreatureStage.canopy.emoji, '�');
       expect(CreatureStage.elder.emoji, '🌳');
     });
 
@@ -102,6 +127,30 @@ void main() {
       expect(s2.energy, 80.0);
       expect(s2.hunger, 40.0);
       expect(s2.stage, CreatureStage.sprout);
+    });
+
+    test('mood derives from stats', () {
+      CreatureState s({double e = 50, double h = 50}) =>
+          CreatureState(
+              energy: e, hunger: h, lastUpdated: DateTime.now());
+      expect(s(e: 0).mood, CreatureMood.dormant);
+      expect(s(e: 10, h: 90).mood, CreatureMood.gloomy);
+      expect(s(e: 80, h: 80).mood, CreatureMood.happy);
+      expect(s().mood, CreatureMood.content);
+    });
+
+    test('displayName falls back to Sprout', () {
+      expect(
+          CreatureState(lastUpdated: DateTime.now()).displayName,
+          'Sprout');
+      expect(
+          CreatureState(lastUpdated: DateTime.now(), name: '  ')
+              .displayName,
+          'Sprout');
+      expect(
+          CreatureState(lastUpdated: DateTime.now(), name: 'Fern')
+              .displayName,
+          'Fern');
     });
   });
 
@@ -210,6 +259,22 @@ void main() {
       expect(await store.careCount('sunlight'), greaterThanOrEqualTo(2));
       expect(await store.careCount('grass'), greaterThanOrEqualTo(1));
     });
+
+    test('persists creature name', () async {
+      var s = await store.loadCreature();
+      await store.saveCreature(s.copyWith(name: 'Fern'));
+      expect((await store.loadCreature()).displayName, 'Fern');
+    });
+
+    test('meal photos persist locally', () async {
+      final bytes =
+          Uint8List.fromList(img.encodeJpg(_grassImage()));
+      final path = await store.logMeal(bytes, greenRatio: 0.6);
+      expect(path, isNotNull);
+      expect(File(path!).existsSync(), true);
+      final meals = await store.meals();
+      expect(meals.any((m) => m['path'] == path), true);
+    });
   });
 
   // ── CreatureController decay ───────────────────────────────────────────────
@@ -233,14 +298,141 @@ void main() {
       expect(ctrl.state.energy, 0.0);
       // hunger: 80 - 8h × 6.25 = 80-50 = 30
       expect(ctrl.state.hunger, closeTo(30.0, 1.0));
+      ctrl.dispose();
     });
 
-    test('hatch transitions shell to hatchling', () async {
+    test('feeds in the same 15-min block keep streak at 1', () async {
+      final ctrl = CreatureController(store: store);
+      await ctrl.applyDecay();
+      await ctrl.feedSunlight(5000);
+      await ctrl.feedSunlight(5000);
+      expect(ctrl.state.streak, 1);
+      ctrl.dispose();
+    });
+  });
+
+  // ── Growth history & debug streak ─────────────────────────────────
+
+  group('Growth & debug', () {
+    test('comboDays counts days with both types once', () async {
+      await store.logCare(type: 'sunlight');
+      await store.logCare(type: 'grass');
+      await store.logCare(type: 'grass');
+      expect(await store.comboDays(), greaterThanOrEqualTo(1));
+    });
+
+    test('debugAdvanceStreak bumps streak on a hatched creature',
+        () async {
       final ctrl = CreatureController(store: store);
       await ctrl.applyDecay();
       await ctrl.hatch();
-      expect(ctrl.state.stage, CreatureStage.hatchling);
-      expect(ctrl.state.hatchedAt, isNotNull);
+      final before = ctrl.state.streak;
+      final n = await ctrl.debugAdvanceStreak();
+      expect(n, before + 1);
+      ctrl.dispose();
+    });
+  });
+
+  // ── Autonomy: wishes, decisions, walking ────────────────────────
+
+  group('Autonomy', () {
+    test('wishes persist: add, open, complete', () async {
+      final id = await store.addWish(
+        title: 'Find a red flower',
+        description: 'Show me something red',
+        kind: 'photo',
+        verifyPrompt: 'Is there a red flower in this photo?',
+      );
+      var open = await store.openWishes();
+      expect(open.any((w) => w['id'] == id), true);
+      await store.completeWish(id);
+      open = await store.openWishes();
+      expect(open.any((w) => w['id'] == id), false);
+      final all = await store.allWishes();
+      expect(all.any((w) => w['id'] == id), true);
+    });
+
+    test('wishes filter by kind', () async {
+      final id = await store.addWish(
+          title: 'Walk with me',
+          description: 'A little stroll',
+          kind: 'walk');
+      expect(
+          (await store.openWishes('walk'))
+              .any((w) => w['id'] == id),
+          true);
+      expect(
+          (await store.openWishes('grass'))
+              .any((w) => w['id'] == id),
+          false);
+    });
+
+    test('fake decide demands sunlight when energy is low',
+        () async {
+      final g = FakeGemmaClient();
+      final d = await g.decide(
+        energy: 10,
+        hunger: 90,
+        stage: 'Hatchling',
+        streak: 1,
+        mood: 'gloomy',
+        walking: false,
+        hasWant: false,
+      );
+      expect(d.action, CreatureAction.demandSunlight);
+      expect(d.line, isNotEmpty);
+    });
+
+    test('debug walk logs care and completes walk wishes',
+        () async {
+      final wishId = await store.addWish(
+          title: 'Walk with me',
+          description: 'A little stroll',
+          kind: 'walk');
+      final ctrl = CreatureController(store: store);
+      await ctrl.applyDecay();
+      await ctrl.hatch();
+      await ctrl.debugWalkSimulate(80);
+      final care = await store.careLog();
+      expect(care.any((c) => c['type'] == 'walk'), true);
+      expect(
+          (await store.openWishes('walk'))
+              .any((w) => w['id'] == wishId),
+          false);
+      ctrl.dispose();
+    });
+  });
+
+  // ── CreatureBody ───────────────────────────────────────────────────
+
+  group('CreatureBody', () {
+    testWidgets('renders and paints without errors', (t) async {
+      _mockSensorChannels(t.binding);
+      final ctrl = CreatureController(store: store);
+      // sqflite_ffi resolves over isolate ports — real async zone needed
+      // (FakeAsync in testWidgets would suspend them forever).
+      await t.runAsync(() async {
+        await ctrl.applyDecay();
+        await ctrl.hatch();
+      });
+      await t.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: CreatureBody(controller: ctrl),
+            ),
+          ),
+        ),
+      );
+      await t.pump(const Duration(milliseconds: 200));
+      expect(find.byType(CustomPaint), findsWidgets);
+      // A pet triggers squash+hop mid-frame — no paint exceptions.
+      ctrl.pet();
+      await t.pump(const Duration(milliseconds: 300));
+      // Unmount first — disposes the body's timers/tickers so the
+      // fake-async zone can flush cleanly.
+      await t.pumpWidget(const SizedBox());
+      ctrl.dispose();
     });
   });
 }

@@ -5,6 +5,7 @@ import '../creature/creature_controller.dart';
 import '../creature/creature_store.dart';
 import '../key_constants.dart';
 import 'creature_page.dart';
+import 'widgets/name_sheet.dart';
 
 /// First-launch only. Egg taps ×3 → hatch → CreaturePage.
 /// pushReplacement so the user can't go back to an un-hatched egg.
@@ -64,6 +65,11 @@ class _HatchPageState extends State<HatchPage>
       await Future.delayed(const Duration(milliseconds: 400));
       if (!mounted) return;
       await widget.controller.hatch();
+      if (!mounted) return;
+      // It hatched — let the user name it before meeting it.
+      final name = await showNameSheet(context);
+      if (!mounted) return;
+      if (name != null) await widget.controller.setName(name);
       if (!mounted) return;
       Navigator.pushReplacement(
         context,

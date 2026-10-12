@@ -3,6 +3,10 @@
     <!-- One-time model download; all inference is offline after that. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.CAMERA"/>
+    <!-- Sleep/wake + pet haptics. -->
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <!-- Step detector for walk-together care. -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
     <!-- Foreground-service model download + progress notification. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>

@@ -15,7 +15,10 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.sprout.musaddiq625"
+        // Kept as com.guesstratus.app so the installed app inherits the
+        // already-downloaded Gemma model from its private storage.
+        // Display name "Sprout" comes from android:label — the ID is invisible.
+        applicationId = "com.guesstratus.app"
         // LiteRT-LM (.litertlm) requires API 30+ (Bionic syscall deps).
         minSdk = 30
         targetSdk = flutter.targetSdkVersion

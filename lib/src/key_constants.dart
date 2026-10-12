@@ -19,12 +19,29 @@ class KeyConstants {
   static const questsButton = Key('questsButton');
   static const streakChip = Key('streakChip');
   static const modelStatusChip = Key('modelStatusChip');
+  static const sleepOverlay = Key('sleepOverlay');
+  static const dreamBubble = Key('dreamBubble');
+  static const thinkingBubble = Key('thinkingBubble');
+  static const sleepHint = Key('sleepHint');
+  static const petHeart = Key('petHeart');
+  static const moodChip = Key('moodChip');
+  static const creatureName = Key('creatureName');
+  static const mealsButton = Key('mealsButton');
+  static const nameField = Key('nameField');
+  static const nameSaveButton = Key('nameSaveButton');
+  static const wantBubble = Key('wantBubble');
+  static const walkBadge = Key('walkBadge');
+  static const dialogueBubble = Key('dialogueBubble');
+  static const evolveRing = Key('evolveRing');
+  static const evolveQuestChip = Key('evolveQuestChip');
+  static const resetButton = Key('resetButton');
+  static const magnifierBadge = Key('magnifierBadge');
 
-  // Sunlight page
+  // Sunbathe — ambient light feed on the creature page
+  static const sunBanner = Key('sunBanner');
+  static const sunRays = Key('sunRays');
   static const luxValue = Key('luxValue');
   static const sunlightFillBar = Key('sunlightFillBar');
-  static const holdSteadyButton = Key('holdSteadyButton');
-  static const sunlightBackButton = Key('sunlightBackButton');
 
   // Grass page
   static const grassPhotoPreview = Key('grassPhotoPreview');
@@ -39,6 +56,20 @@ class KeyConstants {
   // Quest page
   static const questList = Key('questList');
   static const chapter1Header = Key('chapter1Header');
+  static const wishList = Key('wishList');
+  static const wishShowPhoto = Key('wishShowPhoto');
+  static const wishVerifyPrompt = Key('wishVerifyPrompt');
+
+  // Meals page
+  static const mealsGrid = Key('mealsGrid');
+
+  // Story page
+  static const storyButton = Key('storyButton');
+  static const growthTimeline = Key('growthTimeline');
+  static const wifiChip = Key('wifiChip');
+  static const airplaneChip = Key('airplaneChip');
+  static const gemmaChip = Key('gemmaChip');
+  static const careLogList = Key('careLogList');
 
   // Model manager
   static const downloadGemmaButton = Key('downloadGemmaButton');

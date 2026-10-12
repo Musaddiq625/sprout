@@ -21,10 +21,10 @@
     "id": "morning_person",
     "title": "Morning Person",
     "chapter": 1,
-    "description": "Care for Sprout two days in a row.",
+    "description": "Care for Sprout in two 15-minute windows in a row.",
     "type": "streak",
     "target": 2,
-    "story_unlock": "Two days in a row. Sprout notices patterns now."
+    "story_unlock": "Twice in a row. Sprout notices patterns now."
   },
   {
     "id": "both_worlds",
@@ -57,10 +57,10 @@
     "id": "routine",
     "title": "Routine",
     "chapter": 2,
-    "description": "Care for Sprout 3 days in a row.",
+    "description": "Care for Sprout in three 15-minute windows in a row.",
     "type": "streak",
     "target": 3,
-    "story_unlock": "Three days. Sprout counts them."
+    "story_unlock": "Three windows. Sprout counts them."
   },
   {
     "id": "full_day",
@@ -75,10 +75,10 @@
     "id": "week_outside",
     "title": "Week Outside",
     "chapter": 3,
-    "description": "Care for Sprout 7 days in a row.",
+    "description": "Care for Sprout in seven 15-minute windows in a row.",
     "type": "streak",
     "target": 7,
-    "story_unlock": "A full week. Sprout is almost blooming."
+    "story_unlock": "Seven in a row. Sprout is almost blooming."
   },
   {
     "id": "twenty_suns",
@@ -102,9 +102,9 @@
     "id": "long_game",
     "title": "The Long Game",
     "chapter": 3,
-    "description": "Care for Sprout 14 days in a row.",
+    "description": "Care for Sprout in fourteen 15-minute windows in a row.",
     "type": "streak",
     "target": 14,
-    "story_unlock": "Two weeks. Sprout is older now, and quieter about it."
+    "story_unlock": "Fourteen in a row. Sprout is older now, and quieter about it."
   }
 ]

@@ -13,6 +13,7 @@ import '../vision/grass_gate.dart';
 import '../vision/image_prep.dart';
 import 'widgets/camera_capture_page.dart';
 import 'widgets/photo_source_sheet.dart';
+import 'widgets/scan_overlay.dart';
 
 /// Grass feed flow: photo → GrassGate → feed → creature reacts.
 /// Borderline photos go to Gemma vision; the result lands here.
@@ -177,11 +178,15 @@ class _GrassPageState extends State<GrassPage> {
                 child: _photoBytes != null
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: Image.memory(
-                          _photoBytes!,
-                          key: KeyConstants.grassPhotoPreview,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
+                        child: ScanOverlay(
+                          active: _checking,
+                          child: Image.memory(
+                            _photoBytes!,
+                            key: KeyConstants.grassPhotoPreview,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                          ),
                         ),
                       )
                     : Center(

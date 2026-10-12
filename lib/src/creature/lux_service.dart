@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/services.dart';
 
@@ -17,11 +18,16 @@ class LuxService {
   static const _eventChannel =
       EventChannel('com.sprout.musaddiq625/lux_stream');
 
-  /// Minimum lux to count as outdoor sunlight.
-  static const outdoorLux = 2000;
+  /// Minimum lux to count as a real sun-feed. Deliberately far
+  /// above indoor bulbs (~100–500 lux) and bright windows
+  /// (~1–3k) — only genuinely outdoor-class light counts.
+  static const soakLux = 5000;
 
-  /// How long the reading must stay at/above threshold to feed.
-  static const holdDuration = Duration(seconds: 5);
+  /// Kept for backward references — same as [soakLux].
+  static const outdoorLux = soakLux;
+
+  /// Sustained soak time that banks one sun-feed ("a drink").
+  static const holdDuration = Duration(seconds: 3);
 
   /// True if the device reports a working light sensor.
   static Future<bool> hasSensor() async {
@@ -39,6 +45,18 @@ class LuxService {
   static Stream<double> get stream =>
       _eventChannel.receiveBroadcastStream().map((e) => (e as num).toDouble());
 
-  /// True when [lux] is clearly outdoor-level brightness.
-  static bool isOutdoor(double lux) => lux >= outdoorLux;
+  /// True when [lux] is clearly outdoor-level brightness —
+  /// i.e. bright enough for the creature to feed on.
+  static bool isOutdoor(double lux) => lux >= soakLux;
+
+  /// Log-normalized brightness 0..1 for the sun-rays UI.
+  /// Lux is log-distributed, so a linear map would saturate —
+  /// ~200 lux (dim room) → 0, ~30k (direct sun) → 1.
+  static double intensity(double lux) {
+    const lo = 200.0, hi = 30000.0;
+    final l = lux.clamp(lo, hi);
+    return ((math.log(l) - math.log(lo)) /
+            (math.log(hi) - math.log(lo)))
+        .clamp(0.0, 1.0);
+  }
 }
