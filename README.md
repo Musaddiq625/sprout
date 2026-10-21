@@ -4,6 +4,8 @@ A creature that needs you to go outside. On-device AI, sunlight detection, grass
 
 Built for [Hacktoberfest 2026 — Week 1: Touch Grass](https://dev.to/challenges/hf26).
 
+<img width="2251" height="953" alt="sprout mockup" src="https://github.com/user-attachments/assets/efce12a1-a55f-4f51-9cbd-4c7b1607bd8a" />
+
 ## What it is
 
 Sprout is a small creature that lives on your phone. It hatches from an egg, then survives on two things:
@@ -65,3 +67,5 @@ tool/
 ## License
 
 MIT
+
+<p align="center">Built with ❤️ by Musaddiq625</p>
